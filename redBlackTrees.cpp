@@ -1,6 +1,10 @@
 #include<iostream>
 using namespace std;
 
+#define INFO_MSG(msg) printf("[%d][%s] %s\n", __LINE__, __func__, msg);
+#define print1(a) std:cout << #a": " << a << std::endl;
+#define print2(a, b) std:cout << #a": " << a << ", "#b": " << b << std::endl;
+
 typedef struct node{
     int val, l, r;
     bool isRed;
@@ -56,6 +60,7 @@ public:
     }
 
     void decrement(Node* node){
+        INFO_MSG("START");
 		Node* tmp=node;
 		while(tmp->parent != NULL){
 			if(tmp->parent->left == tmp)tmp->parent->l--;
@@ -65,9 +70,11 @@ public:
 	}
 
     void leftRotate(Node* root){
+        INFO_MSG("START");
         Node* p = root->parent;
         root->parent = root->right;
         root->right = root->parent->left;
+        if(root->right)root->right->parent = root;
         root->r = root->parent->l;
         root->parent->left = root;
         root->parent->l = 1+root->l+root->r;
@@ -80,9 +87,11 @@ public:
     }
 
     void rightRotate(Node* root){
+        INFO_MSG("START");
         Node* p = root->parent;
         root->parent = root->left;
         root->left = root->parent->right;
+        if(root->left)root->left->parent = root;
         root->l = root->parent->r;
         root->parent->right = root;
         root->parent->r = 1+root->l+root->r;
@@ -95,6 +104,7 @@ public:
     }
 
     void fix(Node* root){
+        INFO_MSG("START");
         Node* p = root->parent;
         Node* g = p->parent;
         Node* u;
@@ -128,6 +138,7 @@ public:
     }
 
     void _insert(Node* root, int val){
+        INFO_MSG("START");
         if(root == NULL)this->root = getNewNode(val, false);
         while(root != NULL){    
             if(val == root->val){
@@ -369,7 +380,7 @@ public:
                 // case 2: two child
                 else{
                     Node* suc = findMin(root->right);
-                    decrement(suc);
+                    // decrement(suc);
                     root->val = suc->val;
                     root = root->right;
                     val = suc->val;
@@ -474,6 +485,12 @@ public:
                  << "    \x1b[0m";
         }
         else cout << "\x1b[30mNot   \x1b[0m";
+        if(root->parent){
+            color = root->parent->isRed ? 31 : 30;
+            cout << "\x1b[" << color << "m" << root->parent->val 
+                 << "    \x1b[0m";
+        }
+        else cout << "\x1b[30mNot   \x1b[0m";
         cout << "(" << root->l << "," << root->r << ")";
         cout << endl;
         _printTree(root->left);
@@ -482,6 +499,7 @@ public:
 
     void printTree(){
         cout << "\x1b[33mBST is: \x1b[0m\n";
+        cout << "node  left  right parent(l,r)\n";
         _printTree(root);
         printLevelOrderTraversal();
         printSorted();
