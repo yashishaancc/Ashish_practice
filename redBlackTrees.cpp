@@ -26,7 +26,7 @@ using namespace std;
 // #define nocolor ""
 
 typedef struct node{
-    int val, l, r;
+    int key, l, r;
     bool isRed;
     node* left, *right, *parent;
 }Node;
@@ -60,9 +60,9 @@ void freeMem(Node* node){
     return;
 }
 
-Node* getNewNode(int val, bool isRed){
+Node* getNewNode(int key, bool isRed){
     Node* node = allocMem();
-    node->val = val;
+    node->key = key;
     node->l = 0;
     node->r = 0;
     node->isRed = isRed;
@@ -81,9 +81,9 @@ public:
         numNodes = 0;
     }
 
-    Node* _getNewNode(int val, bool isRed){
+    Node* _getNewNode(int key, bool isRed){
         numNodes++;
-        return getNewNode(val, isRed);
+        return getNewNode(key, isRed);
     }
 
     void freeNode(Node* node){
@@ -169,19 +169,19 @@ public:
         }
     }
 
-    void _insert(Node* root, int val){
+    void _insert(Node* root, int key){
         INFO_MSG("START");
-        print2(root, val);
-        if(root == NULL)this->root = _getNewNode(val, false);
+        print2(root, key);
+        if(root == NULL)this->root = _getNewNode(key, false);
         while(root != NULL){    
-            if(val == root->val){
+            if(key == root->key){
                 decrement(root);
                 break;
             }
-            else if(val < root->val){
+            else if(key < root->key){
                 root->l += 1;
                 if(root->left == NULL){
-                    root->left = _getNewNode(val, true);
+                    root->left = _getNewNode(key, true);
                     root->left->parent = root;
                     if(!root->isRed)break;
                     fix(root->left);
@@ -189,10 +189,10 @@ public:
                 }
                 else root = root->left;
             }
-            else if(val > root->val){
+            else if(key > root->key){
                 root->r += 1;
                 if(root->right == NULL){
-                    root->right = _getNewNode(val, true);
+                    root->right = _getNewNode(key, true);
                     root->right->parent = root;
                     if(!root->isRed)break;
                     fix(root->right);
@@ -203,9 +203,9 @@ public:
         }
     }
 
-    void insert(int val){
+    void insert(int key){
         INFO_MSG("START");
-        _insert(root, val);
+        _insert(root, key);
     }
 
     Node* findMin(Node* root){
@@ -222,9 +222,9 @@ public:
         freeNode(root);
     }
 
-    void forgetFix(Node* root, int val){
+    void forgetFix(Node* root, int key){
         INFO_MSG("START");
-        print2(root, val);
+        print2(root, key);
         cout << "In forgetFix\n";
         if(root == this->root){
             cout << "In forgetFix case 1\n";
@@ -241,7 +241,7 @@ public:
             cout << "In forgetFix case 4\n";
             p->isRed = false;
             s->isRed = true;
-            if(val == root->val && !root->left && !root->right)del(root, p);
+            if(key == root->key && !root->left && !root->right)del(root, p);
             return;
         }
         // case 6 in tushar roy's video(terminating)
@@ -251,7 +251,7 @@ public:
             s->isRed = p->isRed;
             p->isRed = false;
             sr->isRed = false;
-            if(val == root->val && !root->left && !root->right)del(root, p);
+            if(key == root->key && !root->left && !root->right)del(root, p);
             return;
         }
         else if(root == p->right && !s->isRed && sl && sl->isRed){
@@ -260,7 +260,7 @@ public:
             s->isRed = p->isRed;
             p->isRed = false;
             sl->isRed = false;
-            if(val == root->val && !root->left && !root->right)del(root, p);
+            if(key == root->key && !root->left && !root->right)del(root, p);
             return;
         }
         // case 3 in tushar roy's video
@@ -268,27 +268,27 @@ public:
            (!sl || !sl->isRed) && (!sr || !sr->isRed)){
             cout << "In forgetFix case 3\n";
             s->isRed = true;
-            if(val == root->val && !root->left && !root->right)del(root, p);
-            forgetFix(p, val);
+            if(key == root->key && !root->left && !root->right)del(root, p);
+            forgetFix(p, key);
             return;
         }
-        // case 5 in tushar roy's video
-        if(root == p->left && !p->isRed && !s->isRed && 
+        // case 5 in tushar roy's video (!p->isRed || p->isRed) = true
+        if(root == p->left && true && !s->isRed && 
            (!sr || !sr->isRed) && (sl && sl->isRed)){
             cout << "In forgetFix case 5\n";
             rightRotate(s);
             s->isRed = true;
             sl->isRed = false;
-            forgetFix(root, val);
+            forgetFix(root, key);
             return;
         }
-        else if(root == p->right && !p->isRed && !s->isRed && 
+        else if(root == p->right && true && !s->isRed && 
            (sr && sr->isRed) && (!sl || !sl->isRed)){
             cout << "In forgetFix case 5\n";
             leftRotate(s);
             s->isRed = true;
             sr->isRed = false;
-            forgetFix(root, val);
+            forgetFix(root, key);
             return;
         }
         // case 2 in tushar roy's video
@@ -298,17 +298,17 @@ public:
             else rightRotate(p);
             p->isRed = true;
             s->isRed = false;
-            forgetFix(root, val);
+            forgetFix(root, key);
             return;
         }
     }
 
-    void _forget(Node* root, int val){
+    void _forget(Node* root, int key){
         INFO_MSG("START");
         while(root != NULL){
-            if(val < root->val)root = root->left;
-            else if(val > root->val)root = root->right;
-            else if(val == root->val){
+            if(key < root->key)root = root->left;
+            else if(key > root->key)root = root->right;
+            else if(key == root->key){
                 // case 0: no child
                 if(root->left == NULL && root->right == NULL){
                     if(root->parent == NULL){
@@ -321,20 +321,20 @@ public:
                         else root->parent->right = NULL;
                         freeNode(root);
                     }
-                    else forgetFix(root, val);
+                    else forgetFix(root, key);
                     break;
                 }
                 // case 1: one child
                 else if(root->right == NULL){
                     decrement(root->left);
-                    root->val = root->left->val;
+                    root->key = root->left->key;
                     freeNode(root->left);
                     root->left = NULL;
                     break;
                 }
                 else if(root->left == NULL){
                     decrement(root->right);
-                    root->val = root->right->val;
+                    root->key = root->right->key;
                     freeNode(root->right);
                     root->right = NULL;
                     break;
@@ -342,26 +342,26 @@ public:
                 // case 2: two child
                 else{
                     Node* suc = findMin(root->right);
-                    root->val = suc->val;
+                    root->key = suc->key;
                     root = suc;
-                    print1(suc->val);
-                    val = suc->val;
+                    print1(suc->key);
+                    key = suc->key;
                 }
             }
         }
     }
 
-    void forget(int val){
+    void forget(int key){
         INFO_MSG("START");
-        _forget(root, val);
+        _forget(root, key);
     }
 
     int _rank(Node* root, int x){
         INFO_MSG("START");
         if(root == NULL)return -1;
-        if(x < root->val)return _rank(root->left, x);
-        if(x == root->val)return root->l+1;
-        if(x > root->val){
+        if(x < root->key)return _rank(root->left, x);
+        if(x == root->key)return root->l+1;
+        if(x > root->key){
             int R = _rank(root->right, x);
             if(R != -1)return root->l+1+R;
             return R;
@@ -377,9 +377,9 @@ public:
     Node* _find(Node* root,int x){
         INFO_MSG("START");
         if(root == NULL)return root;
-        if(root->val == x)return root;
-        if(x < root->val)return _find(root->left, x);
-        if(x > root->val)return _find(root->right, x);
+        if(root->key == x)return root;
+        if(x < root->key)return _find(root->left, x);
+        if(x > root->key)return _find(root->right, x);
         return root;
     }
 
@@ -405,7 +405,7 @@ public:
 		if(root == NULL)return;
 		if(d == 1){
             string color = root->isRed ? red : black;
-            cout << color << root->val << "  " << nocolor;
+            cout << color << root->key << "  " << nocolor;
         }
 		if(d > 1){
 			_printCurrentLevel(root->left, d-1);
@@ -435,7 +435,7 @@ public:
             if((root->left && root->left->isRed) || 
                 (root->right && root->right->isRed)){
                     cout << "Error:\n";
-                    print1(root->val);
+                    print1(root->key);
                     return false;
             }
         }
@@ -444,7 +444,7 @@ public:
         bool isRightValid = _isValidRBTree(root->right, rightBlackCount);
         if(leftBlackCount != rightBlackCount){
             cout << "Error:\n";
-            print3(root->val, leftBlackCount, rightBlackCount);
+            print3(root->key, leftBlackCount, rightBlackCount);
             return false;
         }
         blackCount = leftBlackCount+(root->isRed ? 0 : 1);
@@ -470,12 +470,12 @@ public:
             }
             if(root->left->parent != root){
                 cout << "Error:\n";
-                print2(root->val, root->left->val);
+                print2(root->key, root->left->key);
                 return false;
             }
-            if(root->left->val >= root->val){
+            if(root->left->key >= root->key){
                 cout << "Error:\n";
-                print2(root->val, root->left->val);
+                print2(root->key, root->left->key);
                 return false;
             }
         }
@@ -492,12 +492,12 @@ public:
             }
             if(root->right->parent != root){
                 cout << "Error:\n";
-                print2(root->val, root->right->val);
+                print2(root->key, root->right->key);
                 return false;
             }
-            if(root->right->val <= root->val){
+            if(root->right->key <= root->key){
                 cout << "Error:\n";
-                print2(root->val, root->right->val);
+                print2(root->key, root->right->key);
                 return false;
             }
         }
@@ -531,7 +531,7 @@ public:
         if(root == NULL)return;
         _printSorted(root->left);
         string color = root->isRed ? red : black;
-        cout << color << root->val << " " << nocolor;
+        cout << color << root->key << " " << nocolor;
         _printSorted(root->right);
     }
 
@@ -544,21 +544,21 @@ public:
     void _printTree(Node* root){
         if(root == NULL)return;
         string color = root->isRed ? red : black;
-        cout << color << root->val << "(" << ((root->isRed)? "r" : "b") << ")" \
+        cout << color << root->key << "(" << ((root->isRed)? "r" : "b") << ")" \
             << "\t" << nocolor;
         if(root->left != NULL){
             color = root->left->isRed ? red : black;
-            cout << color << root->left->val << "\t" << nocolor;
+            cout << color << root->left->key << "\t" << nocolor;
         }
         else cout << black << "Not\t" << nocolor;
         if(root->right != NULL){
             color = root->right->isRed ? red : black;
-            cout << color << root->right->val << "\t" << nocolor;
+            cout << color << root->right->key << "\t" << nocolor;
         }
         else cout << black << "Not\t" << nocolor;
         if(root->parent){
             color = root->parent->isRed ? red : black;
-            cout << color << root->parent->val << "\t" << nocolor;
+            cout << color << root->parent->key << "\t" << nocolor;
         }
         else cout << black << "Not\t" << nocolor;
         cout << "(" << root->l << "," << root->r << ")";
