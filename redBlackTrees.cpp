@@ -1,7 +1,8 @@
 #include<iostream>
 using namespace std;
 
-#define INFO_MSG(msg) printf("[%d][%s] %s\n", __LINE__, __func__, msg);
+// #define INFO_MSG(msg) printf("[%d][%s] %s\n", __LINE__, __func__, msg);
+#define INFO_MSG(msg);
 #define print1(a) std::cout << "[" << __LINE__ << "]"  << #a": " << a \
     << std::endl;
 #define print2(a, b) std::cout << "[" << __LINE__ << "]" << #a": " << a \
@@ -26,7 +27,7 @@ using namespace std;
 // #define nocolor ""
 
 typedef struct node{
-    int key, l, r;
+    int key, val, l, r, lc, rc;
     bool isRed;
     node* left, *right, *parent;
 }Node;
@@ -60,9 +61,10 @@ void freeMem(Node* node){
     return;
 }
 
-Node* getNewNode(int key, bool isRed){
+Node* getNewNode(int key, int val, bool isRed){
     Node* node = allocMem();
     node->key = key;
+    node->val = val;
     node->l = 0;
     node->r = 0;
     node->isRed = isRed;
@@ -81,9 +83,9 @@ public:
         numNodes = 0;
     }
 
-    Node* _getNewNode(int key, bool isRed){
+    Node* _getNewNode(int key, int val, bool isRed){
         numNodes++;
-        return getNewNode(key, isRed);
+        return getNewNode(key, val, isRed);
     }
 
     void freeNode(Node* node){
@@ -169,11 +171,11 @@ public:
         }
     }
 
-    void _insert(Node* root, int key){
+    void _insert(Node* root, int key, int val){
         INFO_MSG("START");
-        print2(root, key);
-        if(root == NULL)this->root = _getNewNode(key, false);
-        while(root != NULL){    
+        print3(root, key, val);
+        if(root == NULL)this->root = _getNewNode(key, val, false);
+        while(root != NULL){  
             if(key == root->key){
                 decrement(root);
                 break;
@@ -181,7 +183,7 @@ public:
             else if(key < root->key){
                 root->l += 1;
                 if(root->left == NULL){
-                    root->left = _getNewNode(key, true);
+                    root->left = _getNewNode(key, val, true);
                     root->left->parent = root;
                     if(!root->isRed)break;
                     fix(root->left);
@@ -192,7 +194,7 @@ public:
             else if(key > root->key){
                 root->r += 1;
                 if(root->right == NULL){
-                    root->right = _getNewNode(key, true);
+                    root->right = _getNewNode(key, val, true);
                     root->right->parent = root;
                     if(!root->isRed)break;
                     fix(root->right);
@@ -203,9 +205,9 @@ public:
         }
     }
 
-    void insert(int key){
+    void insert(int key, int val){
         INFO_MSG("START");
-        _insert(root, key);
+        _insert(root, key, val);
     }
 
     Node* findMin(Node* root){
@@ -328,6 +330,7 @@ public:
                 else if(root->right == NULL){
                     decrement(root->left);
                     root->key = root->left->key;
+                    root->val = root->left->val;
                     freeNode(root->left);
                     root->left = NULL;
                     break;
@@ -335,6 +338,7 @@ public:
                 else if(root->left == NULL){
                     decrement(root->right);
                     root->key = root->right->key;
+                    root->val = root->right->val;
                     freeNode(root->right);
                     root->right = NULL;
                     break;
@@ -343,6 +347,7 @@ public:
                 else{
                     Node* suc = findMin(root->right);
                     root->key = suc->key;
+                    root->val = suc->val;
                     root = suc;
                     print1(suc->key);
                     key = suc->key;
@@ -386,7 +391,8 @@ public:
     void find(int x){
         INFO_MSG("START");
         Node* node = _find(root, x);
-        if(node != NULL)cout << green << "Found" << nocolor << "\n";
+        if(node != NULL)cout << green << "Found, val: " << node->val \
+            << nocolor << "\n";
         else cout << red << "Not found" << nocolor << "\n";
     }
 
@@ -531,7 +537,7 @@ public:
         if(root == NULL)return;
         _printSorted(root->left);
         string color = root->isRed ? red : black;
-        cout << color << root->key << " " << nocolor;
+        cout << color << root->key << "(" << root->val << ") " << nocolor;
         _printSorted(root->right);
     }
 
@@ -561,7 +567,8 @@ public:
             cout << color << root->parent->key << "\t" << nocolor;
         }
         else cout << black << "Not\t" << nocolor;
-        cout << "(" << root->l << "," << root->r << ")";
+        cout << "(" << root->l << "," << root->r << ")\t";
+        cout << root->val;
         cout << endl;
         _printTree(root->left);
         _printTree(root->right);
@@ -569,45 +576,48 @@ public:
 
     void printTree(){
         cout << yellow << "BST is:" << nocolor << "\n";
-        cout << "node\tleft\tright\tparent\t(l,r)\n";
-        _printTree(root);
-        printLevelOrderTraversal();
-        printSorted();
+        cout << "node\tleft\tright\tparent\t(l,r)\tval\n";
+        print1(numNodes);
+        cout << "Height or Depth: " << height() << endl;
+        // _printTree(root);
+        // printLevelOrderTraversal();
+        // printSorted();
     }
 };
 
 int main(){
     initializePool();
     RedBlackTree t1;
-    // t1.insert(-20);
-    // t1.insert(-10);
-    // t1.insert(0);
-    // t1.insert(10);
-    // t1.insert(20);
-    // t1.insert(30);
-    // t1.insert(40);
-    // t1.insert(50);
-    // t1.insert(60);
-    // t1.insert(70);
-    // t1.insert(80);
-    // t1.insert(90);
-    // t1.insert(100);
+    // t1.insert(-20,-20);
+    // t1.insert(-10,-10);
+    // t1.insert(0,0);
+    // t1.insert(10,10);
+    // t1.insert(20,20);
+    // t1.insert(30,30);
+    // t1.insert(40,40);
+    // t1.insert(50,50);
+    // t1.insert(60,60);
+    // t1.insert(70,70);
+    // t1.insert(80,80);
+    // t1.insert(90,90);
+    // t1.insert(100,100);
     t1.printTree();
     string str;
-    int x;
+    int x, y, count = 0;
     while(true){
         cout << yellow << "Possible commands:\n"
-             << "find x, add x, del x, rank x, stop\n" << nocolor;
+             << "find x, add x y, del x, rank x, stop\n" << nocolor;
         cin >> str;
         cin >> x;
         print2(str, x);
         if(str == "find")t1.find(x);
-        if(str == "add")t1.insert(x);
+        if(str == "add"){ cin >> y; t1.insert(x, y); }
         if(str == "del")t1.forget(x);
         if(str == "rank")t1.rank(x);
         if(str == "stop")break;
         t1.printTree();
         t1.checkValidity();
         t1.isValidRBTree();
+        print1(count++);
     } 
 }
