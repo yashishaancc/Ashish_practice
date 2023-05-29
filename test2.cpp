@@ -14,6 +14,9 @@ int main(){
     cout << "1234567812345678123456781234567812345678\n";
     cout << "a\tbc\tdef--ghi\tjkl\n";
     // if()cout << "Empty\n";
+    cout << sizeof(long) << endl;
+    cout << sizeof(long long) << endl;
+    cout << sizeof(long long int) << endl;
     if(0 == 0)exit(1);
     else cout << "else\n";
     cout << "Please print me\n";

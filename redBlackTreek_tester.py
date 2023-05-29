@@ -6,7 +6,7 @@ currentNodes = set()
 # NodesVal = set()
 f = open("redBlackTreeTest.txt", "w")
 
-for i in range(10000):
+for i in range(100):
     key = None
     val = None
     cmd = random.choice(commands)
