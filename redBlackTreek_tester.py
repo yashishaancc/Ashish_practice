@@ -6,13 +6,14 @@ currentNodes = set()
 # NodesVal = set()
 f = open("redBlackTreeTest.txt", "w")
 
-for i in range(100):
+for i in range(10000):
     key = None
     val = None
     cmd = random.choice(commands)
     if(cmd == "add"):
         key = random.choice(range(1, 1000))
-        val = random.choice(range(1, 1000))
+        # val = random.choice(range(1, 1000))
+        val = key
         currentNodes.add(key)
         # NodesVal.add(val)
         print(f"{cmd} {key} {val}", file = f)

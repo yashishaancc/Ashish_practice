@@ -2,8 +2,8 @@
 #include "plf_nanotimer.h"
 using namespace std;
 
-// #define INFO_MSG(msg) printf("[%d][%s] %s\n", __LINE__, __func__, msg);
-#define INFO_MSG(msg);
+#define INFO_MSG(msg) printf("[%d][%s] %s\n", __LINE__, __func__, msg);
+// #define INFO_MSG(msg);
 #define print1(a) std::cout << "[" << __LINE__ << "]"  << #a": " << a \
     << std::endl;
 #define print2(a, b) std::cout << "[" << __LINE__ << "]" << #a": " << a \
@@ -120,7 +120,7 @@ public:
 	}
 
     void leftRotate(Node* root){
-        // INFO_MSG("START");
+        INFO_MSG("START");
         Node* p = root->parent;
         root->parent = root->right;
         root->right = root->parent->left;
@@ -139,7 +139,7 @@ public:
     }
 
     void rightRotate(Node* root){
-        // INFO_MSG("START");
+        INFO_MSG("START");
         Node* p = root->parent;
         root->parent = root->left;
         root->left = root->parent->right;
@@ -625,10 +625,10 @@ public:
         cout << yellow << "BST is:" << nocolor << "\n";
         print1(numNodes);
         cout << "Height or Depth: " << height() << endl;
-        cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
-        _printTree(root);
-        printLevelOrderTraversal();
-        printSorted();
+        // cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
+        // _printTree(root);
+        // printLevelOrderTraversal();
+        // printSorted();
     }
 };
 
@@ -666,7 +666,7 @@ int main(){
         t1.printTree();
         t1.checkValidity();
         t1.isValidRBTree();
-        // print1(count++);
+        print1(count++);
     }
     long long int time_taken = timer1.get_elapsed_ns();
     print1(time_taken);
