@@ -1,5 +1,5 @@
 /*
-Note: This code copies values while deleting
+Note: This code does not copies values while deleting
 */
 #include<iostream>
 #include "plf_nanotimer.h"
@@ -72,7 +72,7 @@ void freeMem(Node* node){
     return;
 }
 
-Node* getNewNode(int key, int val, bool isRed){
+Node* getNewNode(int key,const int& val, bool isRed){
     Node* node = allocMem();
     node->key = key;
     node->val = val;
@@ -121,6 +121,29 @@ public:
 			tmp = tmp->parent;
 		}
 	}
+
+    void decrementCount(Node* node, int val){
+        INFO_MSG("START");
+        Node* tmp = node;
+        while(tmp->parent != NULL){
+            if(tmp->parent->left == tmp)
+                tmp->parent->lc -= val;
+            if(tmp->parent->right == tmp)
+                tmp->parent->rc -= val;
+            tmp = tmp->parent;
+        }
+    }
+
+    void setParentsChild(Node* suc, Node* tmp){
+        INFO_MSG("START");
+        if(suc->parent){
+            if(suc->parent->left == tmp)
+                suc->parent->left = suc;
+            else if(suc->parent->right == tmp)
+                suc->parent->right = suc;
+        }
+        else this->root = suc;
+    }
 
     void leftRotate(Node* root){
         INFO_MSG("START");
@@ -353,41 +376,161 @@ public:
                 }
                 // case 1: one child
                 else if(root->right == NULL){
-                    root->l--;
-                    root->lc = 0;
                     decrement(root, root->val);
-                    root->key = root->left->key;
-                    root->val = root->left->val;
-                    freeNode(root->left);
-                    root->left = NULL;
+                    Node* p = root->parent;
+                    if(p == NULL){
+                        this->root = root->left;
+                        root->left->parent = NULL;
+                    }
+                    else{
+                        if(p->left == root)p->left = root->left;
+                        else if(p->right == root)p->right = root->left;
+                        root->left->parent = p;
+                    }
+                    root->left->isRed = false;
+                    freeNode(root);
                     break;
                 }
                 else if(root->left == NULL){
-                    root->r--;
-                    root->rc = 0;
                     decrement(root, root->val);
-                    root->key = root->right->key;
-                    root->val = root->right->val;
-                    freeNode(root->right);
-                    root->right = NULL;
+                    Node* p = root->parent;
+                    if(p == NULL){
+                        this->root = root->right;
+                        root->right->parent = NULL;
+                    }
+                    else{
+                        if(p->left == root)p->left = root->right;
+                        else if(p->right == root)p->right = root->right;
+                        root->right->parent = p;
+                    }
+                    root->right->isRed = false;
+                    freeNode(root);
                     break;
                 }
                 // case 2: two child
                 else{
                     Node* suc = findMin(root->right);
                     Node* tmp = root;
-                    while(tmp->parent != NULL){
-                        if(tmp->parent->left == tmp)
-                            tmp->parent->lc += suc->val-root->val;
-                        if(tmp->parent->right == tmp)
-                            tmp->parent->rc += suc->val-root->val;
-                        tmp = tmp->parent;
+                    if(suc != tmp->right){
+                        if(suc->isRed){
+                            decrement(suc, suc->val);
+                            suc->l = tmp->l;
+                            suc->r = tmp->r;
+                            suc->lc = tmp->lc;
+                            suc->rc = tmp->rc;
+                            suc->parent->left = NULL;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->right = tmp->right;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            suc->right->parent = suc;
+                            decrementCount(suc, tmp->val-suc->val);
+                            freeNode(tmp);
+                        }
+                        else if(!suc->right){
+                            decrementCount(suc, suc->val);
+                            suc->l = tmp->l;
+                            suc->r = tmp->r;
+                            suc->lc = tmp->lc;
+                            suc->rc = tmp->rc;
+                            Node* ps = suc->parent;
+                            suc->parent->left = tmp;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->right = tmp->right;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            suc->right->parent = suc;
+                            tmp->parent = ps;
+                            tmp->left = NULL;
+                            tmp->right = NULL;
+                            tmp->isRed = false;
+                            tmp->l = 0;
+                            tmp->r = 0;
+                            tmp->lc = 0;
+                            tmp->rc = 0;
+                            decrementCount(suc, tmp->val-suc->val);
+                            decrementCount(tmp, -tmp->val);
+                            forgetFix(tmp, key);
+                        }
+                        else{
+                            decrement(suc, suc->val);
+                            Node* ps = suc->parent;
+                            Node* sr = suc->right;
+                            suc->l = tmp->l;
+                            suc->r = tmp->r;
+                            suc->lc = tmp->lc;
+                            suc->rc = tmp->rc;
+                            suc->parent->left = sr;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->right = tmp->right;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            suc->right->parent = suc;
+                            sr->parent = ps;
+                            sr->isRed = false;
+                            decrementCount(suc, tmp->val-suc->val);
+                            freeNode(tmp);
+                        }
                     }
-                    root->key = suc->key;
-                    root->val = suc->val;
-                    root = suc;
-                    // print1(suc->key);
-                    key = suc->key;
+                    else{
+                        if(suc->isRed){
+                            suc->l = tmp->l;
+                            suc->r = 0;
+                            suc->lc = tmp->lc;
+                            suc->rc = 0;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->right = NULL;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            decrement(suc, tmp->val);
+                            freeNode(tmp);
+                        }
+                        else if(!suc->right){
+                            Node* curr = suc;
+                            suc->l = tmp->l;
+                            suc->r = tmp->r;
+                            suc->lc = tmp->lc;
+                            suc->rc = tmp->val;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->right = tmp;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            suc->right->parent = suc;
+                            tmp->left = NULL;
+                            tmp->right = NULL;
+                            tmp->isRed = false;
+                            tmp->l = 0;
+                            tmp->r = 0;
+                            tmp->lc = 0;
+                            tmp->rc = 0;
+                            forgetFix(tmp, key);
+                        }
+                        else{
+                            decrement(suc, suc->val);
+                            Node* sr = suc->right;
+                            suc->l = tmp->l;
+                            suc->r = tmp->r;
+                            suc->lc = tmp->lc;
+                            suc->parent = tmp->parent;
+                            suc->left = tmp->left;
+                            suc->isRed = tmp->isRed;
+                            suc->left->parent = suc;
+                            setParentsChild(suc, tmp);
+                            sr->isRed = false;
+                            decrementCount(suc, tmp->val-suc->val);
+                            freeNode(tmp);
+                        }
+                    }
                 }
             }
         }
@@ -396,6 +539,36 @@ public:
     void forget(int key){
         // INFO_MSG("START");
         _forget(root, key);
+    }
+
+    void modify(int key, int diff){
+        INFO_MSG("START");
+        Node* tmp = root;
+        while(tmp != NULL){
+            if(key < tmp->key)tmp = tmp->left;
+            else if(key > tmp->key)tmp = tmp->right;
+            else if(key == tmp->key){
+                tmp->val += diff;
+                decrementCount(tmp, -diff);
+                break;
+            }
+        }
+    }
+
+    Node* _priority(Node* root, int x){
+        INFO_MSG("START");
+        if(root == NULL)return root;
+        else if(root->lc >= x)return _priority(root->left, x);
+        else if(root->lc+root->val >= x)return root;
+        else return _priority(root->right, x-(root->lc+root->val));
+    }
+
+    void priority(int x){
+        INFO_MSG("START");
+        Node* node = _priority(root, x);
+        if(node)cout << green << "Priority " << x << ": key = " << node->key 
+                     << ", val = " << node->val << nocolor << endl;
+        else cout << red << "Priority " << x << ": None" << nocolor << endl;
     }
 
     int _rank(Node* root, int x){
@@ -629,10 +802,10 @@ public:
         cout << yellow << "BST is:" << nocolor << "\n";
         print1(numNodes);
         cout << "Height or Depth: " << height() << endl;
-        // cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
-        // _printTree(root);
-        // printLevelOrderTraversal();
-        // printSorted();
+        cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
+        _printTree(root);
+        printLevelOrderTraversal();
+        printSorted();
     }
 };
 
@@ -658,14 +831,17 @@ int main(){
     timer1.start();
     while(true){
         cout << yellow << "Possible commands:\n"
-             << "find x, add x y, del x, rank x, stop 1\n" << nocolor;
+             << "find x, add x y, del x, rank x, modify x diff, priority x"
+             << ", stop 1\n" << nocolor;
         cin >> str;
         cin >> x;
-        // print2(str, x);
+        print2(str, x);
         if(str == "find")t1.find(x);
-        if(str == "add"){ cin >> y; t1.insert(x, y); }
+        if(str == "add"){ cin >> y; print1(y); t1.insert(x, y); }
         if(str == "del")t1.forget(x);
         if(str == "rank")t1.rank(x);
+        if(str == "modify"){ cin >> y; print1(y); t1.modify(x, y); }
+        if(str == "priority")t1.priority(x);
         if(str == "stop")break;
         t1.printTree();
         t1.checkValidity();
