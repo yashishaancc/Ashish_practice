@@ -60,5 +60,6 @@ int main(){
     // t1.initialize(2);
 
     Test *t2 = new Test(5);
-    // t2.initialize(3);
+    t2->initialize(3);
+    delete t2;
 }

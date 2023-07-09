@@ -629,10 +629,10 @@ public:
         cout << yellow << "BST is:" << nocolor << "\n";
         print1(numNodes);
         cout << "Height or Depth: " << height() << endl;
-        // cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
-        // _printTree(root);
-        // printLevelOrderTraversal();
-        // printSorted();
+        cout << "node\tleft\tright\tparent\t(l,r)\tval\t(lc,rc)\n";
+        _printTree(root);
+        printLevelOrderTraversal();
+        printSorted();
     }
 };
 

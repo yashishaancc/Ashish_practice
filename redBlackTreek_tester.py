@@ -29,4 +29,4 @@ for i in range(n):
         currentNodes.remove(key)
         print(f"{cmd} {key}", file = f)
     
-print("stop", file = f)
+print("stop 1", file = f)
